@@ -235,7 +235,7 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
-      - uses: taiki-e/install-action@c93ccc03e00cd0e08e494f5fd058a6c55a6a1907 # v2
+      - uses: taiki-e/install-action@43aecc8d72668fbcfe75c31400bc4f890f1c5853 # v2
         with:
           tool: cargo-hack@0.6.45
       - run: cargo hack --locked --workspace --feature-powerset check
@@ -271,7 +271,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # master
         with:
           toolchain: stable
-      - uses: taiki-e/install-action@c93ccc03e00cd0e08e494f5fd058a6c55a6a1907 # v2
+      - uses: taiki-e/install-action@43aecc8d72668fbcfe75c31400bc4f890f1c5853 # v2
         with:
           tool: mdbook@0.5.3
       - run: mdbook build docs
@@ -313,7 +313,7 @@ jobs:
         with:
           ref: refs/tags/${{ inputs.tag }}
           persist-credentials: false
-      - uses: taiki-e/install-action@c93ccc03e00cd0e08e494f5fd058a6c55a6a1907 # v2
+      - uses: taiki-e/install-action@43aecc8d72668fbcfe75c31400bc4f890f1c5853 # v2
         with:
           tool: cargo-machete@0.9.2
       - run: cargo machete
@@ -332,7 +332,7 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
-      - uses: taiki-e/install-action@c93ccc03e00cd0e08e494f5fd058a6c55a6a1907 # v2
+      - uses: taiki-e/install-action@43aecc8d72668fbcfe75c31400bc4f890f1c5853 # v2
         with:
           tool: cargo-about@0.9.0
       - name: Regenerate third-party notices and assert no diff
