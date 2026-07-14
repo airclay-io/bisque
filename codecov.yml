@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+
+ignore:
+  - "benches/*"
+  - "benches/**/*"
+  - "examples/*"
+  - "examples/**/*"
+  - "tests/*"
+  - "tests/**/*"
+  - "xtask/*"
+  - "xtask/**/*"
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+        informational: true
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+        informational: true
+
+comment:
+  layout: "diff, flags, files"
+  require_changes: true

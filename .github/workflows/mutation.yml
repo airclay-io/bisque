@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# Manually triggered full mutation sweep. This workflow mutates the whole
+# workspace under all features. A failed run means the uploaded `mutants.out`
+# needs inspection.
+
+name: mutation sweep
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+concurrency:
+  group: full-mutation-sweep
+  cancel-in-progress: true
+
+jobs:
+  mutation-sweep:
+    name: full mutation sweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 720
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # master
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: taiki-e/install-action@c93ccc03e00cd0e08e494f5fd058a6c55a6a1907 # v2
+        with:
+          tool: cargo-mutants@27.1.0
+      - name: Full mutation sweep (config in .cargo/mutants.toml)
+        run: cargo mutants --workspace --no-shuffle --all-features
+      - name: Upload mutation results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mutants-out
+          path: mutants.out
+          if-no-files-found: warn
+          retention-days: 14

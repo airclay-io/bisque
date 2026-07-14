@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+name: Recommendation
+description: A problem, a use case, or a high-level design idea. Not an implementation spec.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem or use case
+      description: What you are trying to do, and where the current API or behavior gets in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: direction
+    attributes:
+      label: Suggested direction
+      description: Optional. A rough idea of how it might work. Leave the details for discussion.
+    validations:
+      required: false

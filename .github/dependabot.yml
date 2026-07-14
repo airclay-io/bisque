@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: deps
+    # Wait two days before adopting a fresh release.
+    cooldown:
+      default-days: 2
+    groups:
+      cargo-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    # Wait two days before adopting a fresh action release.
+    cooldown:
+      default-days: 2
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch

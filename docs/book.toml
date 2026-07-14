@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+
+[book]
+title = "bisque"
+description = "Contract-tested audio DSP processors for Rust."
+authors = ["Airclay LLC"]
+language = "en"
+src = "src"
+
+[output.html]
+git-repository-url = "https://github.com/airclay-io/bisque"

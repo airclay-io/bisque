@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing and questions
+    url: https://github.com/airclay-io/bisque/blob/main/CONTRIBUTING.md
+    about: How to contribute, the CLA, and the local checks. Open a blank issue to ask a question.

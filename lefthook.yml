@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# Local fast-feedback Git hooks, managed by lefthook (https://lefthook.dev).
+# CI (.github/workflows/ci.yml) is the authoritative gate; these hooks only
+# catch cheap failures before you push, and are bypassable with --no-verify.
+#
+# Install the hooks once after cloning:  lefthook install
+# (Personal overrides go in lefthook-local.yml, which is gitignored.)
+#
+# Deliberately NOT run here, kept in CI because they are too slow for a hook or
+# platform/tooling specific: mutation testing, the feature powerset, the mdBook
+# build, license/about generation, semver-checks, and snapshot freshness
+# (cargo xtask check).
+
+# Fast, no-compile checks: run on every commit, in parallel.
+pre-commit:
+  parallel: true
+  commands:
+    fmt:
+      run: cargo fmt --all --check
+    license-headers:
+      run: bash .github/scripts/check-headers.sh
+    unused-deps:
+      run: cargo machete
+    typos:
+      # Off by default: docs-scoped spell check. Opt in by removing `skip`.
+      # Dictionary false positives should not block a commit.
+      run: typos docs
+      skip: true
+
+# Heavier, compiling checks: run on push only. Sequential to avoid contending
+# on the cargo build lock / target directory.
+pre-push:
+  parallel: false
+  commands:
+    clippy:
+      run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+    test:
+      run: cargo test --locked --workspace --all-features
+    doc:
+      env:
+        RUSTDOCFLAGS: "-D warnings"
+      run: cargo doc --locked --workspace --no-deps --all-features
+    determinism:
+      run: cargo xtask check-determinism

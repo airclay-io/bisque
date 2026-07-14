@@ -1,0 +1,162 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+
+[package]
+name = "bisque"
+description = "A library of contract-tested audio DSP processors: EQ, dynamics, mastering, analysis, generators, time, and optional spectral processing."
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "Apache-2.0"
+authors = ["Airclay LLC"]
+repository = "https://github.com/airclay-io/bisque"
+homepage = "https://github.com/airclay-io/bisque"
+readme = "README.md"
+keywords = ["audio", "dsp", "filter", "mastering", "deterministic"]
+categories = ["multimedia::audio", "algorithms"]
+# Ship library code, tests, fixtures, examples, and docs. Keep repository
+# process files out of the crate artifact.
+include = [
+    "/src",
+    "/tests",
+    "/testdata",
+    "/examples",
+    "/benches",
+    "/docs/src",
+    "/docs/book.toml",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/LICENSE",
+    "/NOTICE",
+    "/THIRD-PARTY-LICENSES.md",
+]
+
+[workspace]
+resolver = "2"
+members = ["xtask"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "Apache-2.0"
+authors = ["Airclay LLC"]
+repository = "https://github.com/airclay-io/bisque"
+homepage = "https://github.com/airclay-io/bisque"
+readme = "README.md"
+
+[features]
+default = [
+    "filters",
+    "dynamics",
+    "mastering",
+    "analysis",
+    "generators",
+    "time",
+    "repair",
+]
+
+filters = []
+dynamics = []
+mastering = []
+analysis = []
+generators = []
+time = []
+repair = []
+spectral = ["dep:realfft"]
+test-support = []
+snapshot-support = ["test-support", "filters", "mastering", "repair", "time"]
+
+# The examples exercise several domain features. `required-features` skips
+# them under feature-scoped builds (e.g. `--no-default-features --features
+# spectral`), so whole-crate test commands pass for every feature subset.
+[[example]]
+name = "offline_chain"
+required-features = [
+    "analysis",
+    "dynamics",
+    "filters",
+    "generators",
+    "mastering",
+    "repair",
+    "time",
+]
+
+[[example]]
+name = "realtime_plugin"
+required-features = ["analysis", "dynamics", "filters", "generators", "mastering"]
+
+[[example]]
+name = "prepared_processor"
+required-features = ["mastering"]
+
+[[example]]
+name = "author_kernel"
+required-features = ["test-support"]
+
+[[bench]]
+name = "processors"
+harness = false
+required-features = ["analysis", "dynamics", "filters", "mastering", "time"]
+
+[lints]
+workspace = true
+
+[dependencies]
+# Pinned pure-Rust transcendental functions for deterministic output across
+# supported operating systems. The pin is part of the output surface.
+libm = "=0.2.11"
+
+# FFT backend, enabled only by the `spectral` feature.
+realfft = { version = "3", optional = true }
+
+[dev-dependencies]
+# EBU R128 conformance oracle for the loudness meter tests.
+ebur128 = "0.1"
+
+# Property-based block-split/event-schedule invariance tests (tests/property.rs).
+# The suite constructs its own `TestRunner` with a fixed ChaCha seed and disabled
+# failure persistence: repository policy is seeded randomness only, so runs are
+# byte-for-byte reproducible and no `proptest-regressions` files are written.
+proptest = "1"
+
+# Statistical, non-blocking CPU benchmarks (`cargo bench --bench processors`).
+criterion = { version = "0.5", default-features = false }
+
+[workspace.dependencies]
+bisque = { path = ".", version = "0.1.0", default-features = false }
+
+# Lints are centralized here and inherited by every package via
+# `[lints] workspace = true`.
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(docsrs)"] }
+
+[workspace.lints.rustdoc]
+all = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+incompatible_msrv = "warn"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_possible_wrap = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+float_cmp = "allow"
+similar_names = "allow"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"

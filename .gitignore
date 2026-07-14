@@ -1,0 +1,32 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+
+# cargo-mutants output. Regenerated every run.
+# The gate config (.cargo/mutants.toml) is committed.
+/mutants.out/
+/mutants.out.old/
+
+# Coverage instrumentation artifacts (cargo llvm-cov, -C instrument-coverage)
+*.profraw
+*.profdata
+lcov.info
+
+# Cargo.lock is committed.
+
+# Editor / OS cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Local AI-agent instructions. Kept on disk, never pushed.
+.claude/
+.ai/
+CLAUDE.md
+
+# lefthook personal overrides
+lefthook-local.yml
+
+# mdBook build output
+/docs/book/

@@ -1,0 +1,15 @@
+bisque
+Copyright (c) 2026 Airclay LLC
+
+This product is developed by Airclay LLC.
+
+Public source releases are licensed under the Apache License, Version 2.0
+(Apache-2.0). See LICENSE.
+
+Contributions are accepted under the contributor terms in CONTRIBUTING.md and,
+when required, the Airclay LLC Contributor License Agreement in CLA.md.
+
+This software may include third-party open-source components, each distributed
+under its own license. See the dependency manifests (Cargo.toml / Cargo.lock),
+`THIRD-PARTY-LICENSES.md`, and `cargo deny check licenses` for the authoritative
+list.

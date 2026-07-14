@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+
+# Defines `cargo xtask <task>`.
+#
+# `--locked` resolves xtask from the same Cargo.lock as locked verification jobs.
+#
+# The alias uses the dev profile. Snapshot verification also runs without
+# `--release`.
+[alias]
+xtask = "run --quiet --locked --package xtask --"

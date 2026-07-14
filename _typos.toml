@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# Configuration for `typos` (crate-ci/typos). See https://github.com/crate-ci/typos
+
+[files]
+# Cargo.lock holds dependency name and hash tokens that trip the spell-checker.
+# The LICENSE files are verbatim legal text. All of testdata/ is generated
+# numeric/hash content (manifest and slices), not prose.
+extend-exclude = ["Cargo.lock", "LICENSE", "testdata/"]
+
+[default.extend-identifiers]
+# Project/brand and crate names that are not dictionary words.
+
+[default.extend-words]
+# Audio/DSP terms to treat as correct.

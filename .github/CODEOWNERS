@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# Changes to CI, release automation, and repository policy require code-owner
+# review because the workflows have publish authority.
+
+/.github/ @wodzen

@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# cargo-deny configuration: license + advisory gating in CI.
+# See https://embarkstudios.github.io/cargo-deny/
+
+[advisories]
+version = 2
+yanked = "deny"
+ignore = []
+
+[licenses]
+version = 2
+# Third-party dependency licenses need to remain suitable for the public
+# Apache-2.0 release. The list is permissive-only and matches the licenses
+# actually present in the dependency graph. Strong copyleft fails review by
+# default; a weak-copyleft dependency (e.g. MPL-2.0) must be admitted as a
+# scoped per-crate entry in `exceptions`, never as a blanket allowance.
+allow = [
+    "Apache-2.0",
+    "MIT",
+    "MIT-0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+]
+confidence-threshold = 0.9
+exceptions = []
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

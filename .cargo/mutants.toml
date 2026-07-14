@@ -1,0 +1,83 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# cargo-mutants configuration.
+#
+# Mutation testing covers DSP implementation code. It excludes:
+#   - the test harness behind the `test-support` feature,
+#   - xtask and the hidden snapshot registry.
+#
+# Callers pass `--all-features` on the cargo-mutants command line so
+# feature-gated domain code, including spectral, is mutated. The flag is not
+# set here as well because supplying it in both places forwards it twice to the
+# baseline build, and cargo rejects the duplicate.
+
+# Run the whole workspace's tests for every mutant.
+test_workspace = true
+
+# Mutations that remove code often leave unused variables. Do not let CI's
+# `-D warnings` classify those otherwise viable mutants as build failures.
+cap_lints = true
+
+# Reject a stale lockfile instead of resolving a different dependency graph.
+additional_cargo_args = ["--locked"]
+
+exclude_globs = [
+    "src/testing/**",
+    "xtask/src/**",
+]
+
+# Documented equivalent or contract-unobservable mutants:
+#
+# - `DynamicsCore::render`: the two sidechain comparisons differ only when the
+#   caller violates the required sidechain geometry. For `level > env`, exact
+#   equality produces a zero envelope increment with either coefficient.
+# - `reset_flush_state`: restores the flush caches from parameter defaults so
+#   a flush before any render is well-defined. Before a render the recursive
+#   state is zero, so every cache value produces identical silent output and
+#   the initialization is unobservable through the public contract. The
+#   behavioral half (the drain-budget reset) is covered by the catalog and
+#   processor-specific new-input restart tests.
+# - `DcBlocker::prepare` tail bound `TAU * fc_min`: the declared cutoff range
+#   minimum is exactly 1.0, so multiplying and dividing by it are identical
+#   (an equivalent mutant by operand value).
+# - `Biquad::lowpass`: `Biquad::default()` and the named low-pass constructor
+#   both produce `Biquad::new()` with the same settings and state.
+# - `linear_to_db_floor` `x > 0.0`: at the boundary `x == 0.0`, both branches
+#   return `floor_db`. The compute branch yields `20 * log10(0.0) = -inf`, which
+#   `.max(floor_db)` absorbs back to `floor_db`, the same value the `x <= 0`
+#   branch returns, so `>` and `>=` are behaviorally identical (an equivalent
+#   mutant).
+# - Empty parameter defaults have identical values and expose the same empty
+#   slice. Replacing them with another empty construction cannot be observed.
+# - The true-peak latency mutation divides by the literal `1` instead of
+#   subtracting it. With the fixed 4x, 12-tap geometry both expressions report
+#   six input frames.
+# - PolyBLEP correction is zero at both branch endpoints. Its named saw
+#   constructor is also exactly the default oscillator.
+# - `TimeStretch` resets its initial analysis position during `prepare`, and a
+#   refill request at an already full window returns zero before the same hop is
+#   produced.
+exclude_re = [
+    "^src/dynamics/shared[.]rs:98:80: replace > with >= in DynamicsCore::render$",
+    "^src/dynamics/shared[.]rs:107:70: replace > with >= in DynamicsCore::render$",
+    "^src/dynamics/shared[.]rs:128:34: replace > with >= in DynamicsCore::render$",
+    "in (Biquad|Limiter|Delay|DcBlocker)::reset_flush_state$",
+    "replace (Biquad|Limiter|Delay|DcBlocker)::reset_flush_state with [(][)]$",
+    "^src/repair/dc_blocker[.]rs:161:68: replace [*] with / in <impl Kernel<T> for DcBlocker>::prepare$",
+    "^src/filters/biquad[.]rs:[0-9]+:[0-9]+: replace Biquad::lowpass -> Self with Default::default[(][)]$",
+    "^src/dsp/mod[.]rs:72:27: replace > with >= in linear_to_db_floor$",
+    "Params for NoParams>::from_bank",
+    "replace Processor::param_info",
+    "replace Kernel::param_info",
+    "replace && with [|][|] in DynamicsCore::render$",
+    "replace - with / in <impl Measurer<T> for TruePeakMeter>::latency$",
+    "replace < with <= in poly_blep$",
+    "replace > with >= in poly_blep$",
+    "replace PolyBlepOsc::saw -> Self with Default::default[(][)]$",
+    "delete - in TimeStretch<T>::with_settings$",
+    "replace < with <= in TimeStretch<T>::make_more$",
+]
+
+# Give slow mutants extra time before they are scored as timeouts.
+timeout_multiplier = 3.0

@@ -1,0 +1,31 @@
+# Third-party licenses
+
+The `bisque` library with all features enabled uses the third-party Rust crates
+listed below. Each is distributed under its own license, whose full text is
+reproduced here.
+
+This file is generated from the crate graph by
+[`cargo about`](https://embarkstudios.github.io/cargo-about/); do not edit it by
+hand. Regenerate with `cargo about generate --locked --all-features --fail -c
+about.toml about.hbs -o THIRD-PARTY-LICENSES.md --manifest-path Cargo.toml`.
+
+{{#each licenses}}
+{{#if used_by.0.crate.source}}
+---
+
+## {{{name}}} ({{id}})
+
+Applies to:
+
+{{#each used_by}}
+{{#if crate.source}}
+- {{crate.name}} {{crate.version}}{{#if crate.repository}}: <{{{crate.repository}}}>{{/if}}
+{{/if}}
+{{/each}}
+
+```text
+{{{text}}}
+```
+
+{{/if}}
+{{/each}}

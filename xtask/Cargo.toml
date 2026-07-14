@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+
+[package]
+name = "xtask"
+description = "Workspace task runner: docs, determinism, snapshots, and listening checks."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+publish = false
+
+[dependencies]
+# Internal path crate only. xtask drives processors through the same testing
+# helpers used by snapshot tests. The listening bench renders every default
+# domain, so the domain features are enabled here too.
+bisque = { workspace = true, default-features = false, features = [
+    "snapshot-support",
+    "analysis",
+    "dynamics",
+    "generators",
+    "spectral",
+] }
+serde_json = "1"
+
+[lints]
+workspace = true

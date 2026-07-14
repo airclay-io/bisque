@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# cargo-about config for THIRD-PARTY-LICENSES.md, the aggregated attribution for
+# third-party crates in the `bisque` library with all features enabled.
+#
+# Regenerate with:
+#   cargo about generate --locked --all-features --fail -c about.toml about.hbs \
+#     -o THIRD-PARTY-LICENSES.md --manifest-path Cargo.toml
+#
+# See https://embarkstudios.github.io/cargo-about/
+
+# Mirror deny.toml's allow-list. A dependency under any other license fails
+# generation.
+accepted = [
+    "Apache-2.0",
+    "MIT",
+    "MIT-0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+]
+
+# Dev/test-only crates are not distributed.
+ignore-dev-dependencies = true
+
+# Workspace crates are first-party and omitted from third-party notices.
+private = { ignore = true }
+
+# The root crate license must satisfy cargo-about, but the template omits the
+# root crate from THIRD-PARTY-LICENSES.md.
+[bisque]
+accepted = ["Apache-2.0"]

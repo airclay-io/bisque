@@ -1,0 +1,112 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Airclay LLC
+#
+# CLA acceptance gate, first-party. The check passes when the pull request
+# author has posted the exact acceptance sentence from CONTRIBUTING.md as a
+# comment on the pull request. Acceptance is per pull request by design:
+# every contribution carries its own recorded assent, and the comment is the
+# record under CLA.md section 10.
+#
+# Security note: this workflow uses `pull_request_target`, which the repo
+# otherwise avoids. The threat behind that trigger is checking out and
+# executing pull-request code with elevated permissions; this workflow never
+# checks out any code. It runs an inline first-party script on GitHub's own
+# github-script action, with permissions to read comments, post the prompt
+# comment, and set a commit status. It has no access to repository contents.
+# Do not add a checkout step here.
+
+name: CLA
+
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] no contributed code is loaded or executed
+    types: [opened, reopened, synchronize]
+  issue_comment:
+    types: [created, edited, deleted]
+
+permissions: {}
+
+concurrency:
+  group: cla-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  cla:
+    name: cla
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      github.event.issue.pull_request
+    permissions:
+      pull-requests: write # Read PR metadata and manage the acceptance prompt.
+      statuses: write # Record the result on the pull request's head commit.
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          retries: 3
+          script: |
+            const PHRASE =
+              'I have read the Airclay LLC Contributor License Agreement in CLA.md and I hereby accept it.';
+            const PROMPT_MARKER = '<!-- cla-prompt -->';
+
+            // Resolve the pull request from either trigger.
+            const prNumber = context.payload.pull_request
+              ? context.payload.pull_request.number
+              : context.payload.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
+              ...context.repo,
+              pull_number: prNumber,
+            });
+
+            // Repository owners and members accept the CLA by policy, and
+            // bots do not hold copyright.
+            const exempt =
+              ['OWNER', 'MEMBER'].includes(pr.author_association) ||
+              pr.user.type === 'Bot';
+
+            // Accepted when the PR author posted the exact sentence.
+            let accepted = exempt;
+            if (!accepted) {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { ...context.repo, issue_number: prNumber, per_page: 100 },
+              );
+              accepted = comments.some(
+                (c) =>
+                  c.user.login === pr.user.login && c.body.trim() === PHRASE,
+              );
+            }
+
+            // Prompt once when acceptance is missing.
+            if (!accepted) {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { ...context.repo, issue_number: prNumber, per_page: 100 },
+              );
+              const prompted = comments.some((c) =>
+                c.body.includes(PROMPT_MARKER),
+              );
+              if (!prompted) {
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body:
+                    `${PROMPT_MARKER}\nThank you for the contribution. ` +
+                    'Meaningful outside contributions require the Airclay LLC ' +
+                    'Contributor License Agreement (see CONTRIBUTING.md and CLA.md). ' +
+                    'To accept it for this pull request, post the following comment, ' +
+                    'exactly as written:\n\n' +
+                    `> ${PHRASE}`,
+                });
+              }
+            }
+
+            await github.rest.repos.createCommitStatus({
+              ...context.repo,
+              sha: pr.head.sha,
+              state: accepted ? 'success' : 'failure',
+              context: 'cla',
+              description: accepted
+                ? 'CLA accepted for this pull request'
+                : 'CLA acceptance comment required (see CONTRIBUTING.md)',
+            });
